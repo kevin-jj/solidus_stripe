@@ -47,7 +47,8 @@ Rails/NotNullColumn: {Exclude: ["db/migrate/20230310152615_add_payment_method_re
 Rails/SkipsModelValidations: {Exclude: ["spec/**/*"]}
 RSpec/DescribeClass: {Exclude: ["spec/features/**/*", "spec/system/**/*", "spec/system/**/*"]} # Feature/System specs are not describing any class or module.
 RSpec/ExampleLength: {Enabled: false}
-RSpec/FilePath: {Exclude: ["spec/requests/solidus_stripe/webhooks_controller/**/*"]}
+RSpec/SpecFilePathFormat: {Exclude: ["spec/requests/solidus_stripe/webhooks_controller/**/*"]}
+RSpec/SpecFilePathSuffix: {Exclude: ["spec/requests/solidus_stripe/webhooks_controller/**/*"]}
 RSpec/MultipleExpectations: {Enabled: false} # More is more.
 Style/AccessorGrouping: {Enabled: true}
 Style/Alias: {Enabled: false, StyleGuide: "https://relaxed.ruby.style/#stylealias"}

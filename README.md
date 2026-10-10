@@ -80,6 +80,26 @@ from payment tokens to payment intents: https://stripe.com/docs/payments/payment
 
 ## Usage
 
+### Saving payment sources to the wallet
+
+The engine registers `SolidusStripe::AddPaymentSourcesToWallet` through
+`Spree::Config.add_payment_sources_to_wallet_class` after shop initializers run.
+It replaces only Solidus's default wallet service, preserving a shop's custom service.
+No wallet configuration is needed in an installation script or shop initializer.
+
+Ordinary checkout and 3DS authentication both use the order completion hook.
+The service preserves Solidus's handling of other payment sources and saves a
+Stripe source only when the successful server confirmation receipt matches the
+payment, source, and registered user's Stripe customer, with confirmed
+`on_session` or `off_session` future usage. Guests, temporary sources, and
+unsuccessful confirmations are not saved. Repeating the hook does not duplicate
+wallet entries. It reads existing gateway logs without another Stripe API call.
+
+If the shop already supplies a custom wallet service, incorporate this Stripe
+handling into that service; the engine will not replace it automatically.
+Existing shops must also update their copied payment partial so Elements'
+`setupFutureUsage` matches the gateway's `setup_future_usage` preference.
+
 ### Showing reusable sources in the checkout
 
 When saving stripe payment methods for future usage the checkout requires

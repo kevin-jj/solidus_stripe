@@ -39,8 +39,7 @@ module SolidusStripe
 
     def usable?
       stripe_intent_id &&
-      (stripe_intent.status == 'requires_payment_method' ||
-        stripe_intent.status == 'requires_confirmation') &&
+      ['requires_payment_method', 'requires_confirmation'].include?(stripe_intent.status) &&
       stripe_intent.amount == stripe_order_amount
     end
 
@@ -52,8 +51,14 @@ module SolidusStripe
     end
 
     def process_payment
-      order.with_lock do
+      locked_order = order
+      locked_order.with_lock do
         reload
+        return false unless order_id == locked_order.id
+
+        # Keep the locked order and transient checkout preferences after the
+        # intent reload clears its association cache.
+        self.order = locked_order
         payment = order.payments.where.not(state: %w[invalid void]).order(id: :desc).find_by!(
           payment_method: payment_method,
           response_code: stripe_intent.id,
@@ -92,7 +97,6 @@ module SolidusStripe
 
         if successful
           order.complete!
-          order.user.wallet.add(payment.source) if order.user && stripe_intent.setup_future_usage.present?
         else
           order.payment_failed!
         end

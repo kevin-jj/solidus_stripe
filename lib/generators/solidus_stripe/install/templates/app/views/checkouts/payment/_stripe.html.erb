@@ -45,6 +45,10 @@
       },
     },
   }
+  if payment_method.preferred_setup_future_usage.present?
+    # Deferred Elements and the server-created Intent must use the same setting.
+    options[:elementsInitialization][:setupFutureUsage] = payment_method.preferred_setup_future_usage
+  end
  %>
 
 <div

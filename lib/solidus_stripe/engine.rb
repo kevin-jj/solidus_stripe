@@ -33,6 +33,14 @@ module SolidusStripe
         Spree::Order < SolidusStripe::OrderPaymentFailure
     end
 
+    config.after_initialize do
+      # Shop initializers (including Spree.load_defaults) have run. Preserve a
+      # shop's custom wallet service; replace only Solidus's default service.
+      if Spree::Config.add_payment_sources_to_wallet_class == Spree::Wallet::AddPaymentSourcesToWallet
+        Spree::Config.add_payment_sources_to_wallet_class = 'SolidusStripe::AddPaymentSourcesToWallet'
+      end
+    end
+
     # use rspec for tests
     config.generators do |g|
       g.test_framework :rspec
