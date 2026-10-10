@@ -28,6 +28,11 @@ module SolidusStripe
       end
     end
 
+    config.to_prepare do
+      Spree::Order.prepend SolidusStripe::OrderPaymentFailure unless
+        Spree::Order < SolidusStripe::OrderPaymentFailure
+    end
+
     # use rspec for tests
     config.generators do |g|
       g.test_framework :rspec

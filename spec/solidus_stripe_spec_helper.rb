@@ -7,6 +7,9 @@ require 'vcr'
 Dir["#{__dir__}/support/solidus_stripe/**/*.rb"].sort.each { |f| require f }
 
 RSpec.configure do |config|
+  # Stripe.js runs real HTTP in the browser and cannot use VCR cassettes.
+  config.filter_run_excluding live_stripe: true unless ENV['SOLIDUS_STRIPE_LIVE_TESTS'] == '1'
+
   config.include SolidusStripe::Webhook::RequestHelper, type: :webhook_request
 end
 

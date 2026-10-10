@@ -2,7 +2,7 @@
 
 require 'solidus_stripe_spec_helper'
 
-RSpec.describe 'SolidusStripe Checkout', :js, :vcr do
+RSpec.describe 'SolidusStripe Checkout', :js, :vcr, :live_stripe do
   include SolidusStripe::CheckoutTestHelper
 
   # To learn more about setup_future_usage in different contexts with Stripe Payment Intents:
