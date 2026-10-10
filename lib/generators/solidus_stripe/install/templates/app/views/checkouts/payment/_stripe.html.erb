@@ -72,3 +72,17 @@
     <!-- Display error/notification messages to your customers here -->
   </div>
 </div>
+
+<% if !current_order.has_checkout_step?("confirm") %>
+  <% payment = current_order.payments.where(payment_method: payment_method).order(id: :desc).first %>
+  <% intent = SolidusStripe::PaymentIntent.find_by(order: current_order, payment_method: payment_method, stripe_intent_id: payment&.response_code) if payment&.response_code %>
+  <% if params[:stripe_authentication_failed].blank? && intent && intent.stripe_intent.status == 'requires_action' %>
+    <input type="hidden"
+      data-controller="solidus-stripe-confirm"
+      data-solidus-stripe-confirm-automatic-value="true"
+      data-solidus-stripe-confirm-publishable-key-value="<%= payment_method.preferred_publishable_key %>"
+      data-solidus-stripe-confirm-client-secret-value="<%= intent.stripe_intent.client_secret %>"
+      data-solidus-stripe-confirm-return-url-value="<%= solidus_stripe.after_confirmation_url(payment_method.slug) %>"
+      data-solidus-stripe-confirm-error-base-url-value="<%= solidus_stripe.after_confirmation_url(payment_method.slug, payment_intent: intent.stripe_intent_id) %>">
+  <% end %>
+<% end %>
