@@ -4,7 +4,7 @@ require 'solidus_stripe_spec_helper'
 
 # Browser-side Stripe requests cannot be replayed by VCR. Both sides of this
 # authentication flow must use the same fresh test-mode PaymentIntent.
-RSpec.describe '3DS checkout without a confirmation page', :js do
+RSpec.describe '3DS checkout without a confirmation page', :js, :live_stripe do
   include SolidusStripe::CheckoutTestHelper
 
   around do |example|

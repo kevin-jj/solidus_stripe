@@ -70,3 +70,5 @@ Direct execution of the fork's final browser spec also passed: 3 examples,
 syntax checks and git diff whitespace checks passed. Changes remain uncommitted.
 
 The real browser scenarios require `SOLIDUS_STRIPE_LIVE_TESTS=1` and Stripe test-mode credentials. They are skipped in the default cassette-based CI; gateway and callback regression tests run without live credentials. Never commit credentials or live request recordings.
+
+Frontend payment scenarios are tagged `live_stripe` because Stripe.js calls the real service from the browser while VCR only intercepts Ruby HTTP. Default CI excludes this tag; it still runs gateway, callback, model, backend and storefront regressions. Set `SOLIDUS_STRIPE_LIVE_TESTS=1` with valid test-mode credentials to include these scenarios. This CI exclusion is not evidence that live checkout passed.
