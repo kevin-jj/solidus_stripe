@@ -25,7 +25,7 @@ RSpec.describe SolidusStripe::Gateway do
     it 'confirms the Stripe payment' do
       stripe_payment_method = Stripe::PaymentMethod.construct_from(id: "pm_123", type: 'card')
       stripe_customer = Stripe::Customer.construct_from(id: 'cus_123')
-      stripe_payment_intent = Stripe::PaymentIntent.construct_from(id: "pi_123", status: "requires_capture")
+      stripe_payment_intent = Stripe::PaymentIntent.construct_from(id: "pi_123")
 
       payment_method = build(:solidus_stripe_payment_method)
       gateway = payment_method.gateway
@@ -56,7 +56,7 @@ RSpec.describe SolidusStripe::Gateway do
         setup_future_usage: nil
       )
       expect(Stripe::PaymentIntent).to have_received(:confirm).with("pi_123")
-      expect(result.params).to eq("data" => '{"id":"pi_123","status":"requires_capture"}')
+      expect(result.params).to eq("data" => '{"id":"pi_123"}')
       expect(payment.reload.response_code).to eq("pi_123")
     end
 
@@ -184,7 +184,7 @@ RSpec.describe SolidusStripe::Gateway do
     it 'authorizes and captures in a single operation' do
       stripe_payment_method = Stripe::PaymentMethod.construct_from(id: "pm_123", type: 'card')
       stripe_customer = Stripe::Customer.construct_from(id: 'cus_123')
-      stripe_payment_intent = Stripe::PaymentIntent.construct_from(id: "pi_123", status: "succeeded")
+      stripe_payment_intent = Stripe::PaymentIntent.construct_from(id: "pi_123")
 
       payment_method = build(:solidus_stripe_payment_method)
       gateway = payment_method.gateway
@@ -215,7 +215,7 @@ RSpec.describe SolidusStripe::Gateway do
         setup_future_usage: nil
       )
       expect(Stripe::PaymentIntent).to have_received(:confirm).with("pi_123")
-      expect(result.params).to eq("data" => '{"id":"pi_123","status":"succeeded"}')
+      expect(result.params).to eq("data" => '{"id":"pi_123"}')
       expect(payment.reload.response_code).to eq("pi_123")
     end
 

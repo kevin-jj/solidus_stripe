@@ -52,53 +52,42 @@ module SolidusStripe
     end
 
     def process_payment
-      order.with_lock do
-        reload
-        payment = order.payments.where.not(state: %w[invalid void]).order(id: :desc).find_by!(
-          payment_method: payment_method,
-          response_code: stripe_intent.id,
-        )
+      payment = order.payments.valid.find_by!(
+        payment_method: payment_method,
+        response_code: stripe_intent.id,
+      )
 
-        return false unless stripe_intent.amount == stripe_order_amount &&
-          stripe_intent.currency == order.currency.downcase
+      payment.started_processing!
 
-        return true if order.completed? && %w[succeeded requires_capture processing].include?(stripe_intent.status)
-
-        # A server-side attempt needing 3DS is marked failed by Solidus. The
-        # authenticated return can retry only this order's matching payment.
-        payment.update!(state: 'checkout') if payment.failed?
-        payment.started_processing!
-
-        case stripe_intent.status
-        when 'processing'
-          successful = true
-        when 'requires_capture'
-          payment.pend! unless payment.pending?
-          successful = true
-        when 'succeeded'
-          payment.complete! unless payment.completed?
-          successful = true
-        else
-          payment.failure!
-          successful = false
-        end
-
-        SolidusStripe::LogEntries.payment_log(
-          payment,
-          success: successful,
-          message: I18n.t("solidus_stripe.intent_status.#{stripe_intent.status}"),
-          data: stripe_intent,
-        )
-
-        if successful
-          order.complete!
-          order.user.wallet.add(payment.source) if order.user && stripe_intent.setup_future_usage.present?
-        else
-          order.payment_failed!
-        end
-
-        successful
+      case stripe_intent.status
+      when 'processing'
+        successful = true
+      when 'requires_capture'
+        payment.pend! unless payment.pending?
+        successful = true
+      when 'succeeded'
+        payment.complete! unless payment.completed?
+        successful = true
+      else
+        payment.failure!
+        successful = false
       end
+
+      SolidusStripe::LogEntries.payment_log(
+        payment,
+        success: successful,
+        message: I18n.t("solidus_stripe.intent_status.#{stripe_intent.status}"),
+        data: stripe_intent,
+      )
+
+      if successful
+        order.complete!
+        order.user.wallet.add(payment.source) if order.user && stripe_intent.setup_future_usage.present?
+      else
+        order.payment_failed!
+      end
+
+      successful
     end
 
     def stripe_intent

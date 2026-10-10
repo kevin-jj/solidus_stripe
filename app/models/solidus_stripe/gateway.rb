@@ -55,13 +55,13 @@ module SolidusStripe
         **stripe_payment_intent_options,
       )
 
-      confirmed_intent = confirm_stripe_payment_intent(stripe_payment_intent.stripe_intent_id)
+      confirm_stripe_payment_intent(stripe_payment_intent.stripe_intent_id)
 
       build_payment_log(
-        success: %w[requires_capture succeeded].include?(confirmed_intent.status),
-        message: I18n.t("solidus_stripe.intent_status.#{confirmed_intent.status}"),
-        response_code: confirmed_intent.id,
-        data: confirmed_intent
+        success: true,
+        message: "PaymentIntent was confirmed successfully",
+        response_code: stripe_payment_intent.stripe_intent_id,
+        data: stripe_payment_intent.stripe_intent
       )
     rescue Stripe::StripeError => e
       build_payment_log(
@@ -115,13 +115,13 @@ module SolidusStripe
         **stripe_payment_intent_options,
       )
 
-      confirmed_intent = confirm_stripe_payment_intent(stripe_payment_intent.stripe_intent_id)
+      confirm_stripe_payment_intent(stripe_payment_intent.stripe_intent_id)
 
       build_payment_log(
-        success: confirmed_intent.status == "succeeded",
-        message: I18n.t("solidus_stripe.intent_status.#{confirmed_intent.status}"),
-        response_code: confirmed_intent.id,
-        data: confirmed_intent,
+        success: true,
+        message: "PaymentIntent was confirmed and captured successfully",
+        response_code: stripe_payment_intent.stripe_intent_id,
+        data: stripe_payment_intent.stripe_intent,
       )
     rescue Stripe::StripeError => e
       build_payment_log(

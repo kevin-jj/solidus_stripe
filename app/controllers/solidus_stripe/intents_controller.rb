@@ -12,8 +12,7 @@ class SolidusStripe::IntentsController < Spree::BaseController
       return head :unprocessable_entity
     end
 
-    unless current_order.confirm? ||
-        (current_order.payment? && !current_order.has_checkout_step?("confirm"))
+    unless current_order.confirm?
       redirect_to main_app.checkout_state_path(current_order.state)
       return
     end
@@ -36,7 +35,7 @@ class SolidusStripe::IntentsController < Spree::BaseController
       )
     else
       flash[:error] = params[:error_message] || t('spree.payment_processing_failed')
-      redirect_to(main_app.checkout_state_path(:payment, stripe_authentication_failed: true))
+      redirect_to(main_app.checkout_state_path(:payment))
     end
   end
 
